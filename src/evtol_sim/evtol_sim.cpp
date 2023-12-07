@@ -82,7 +82,7 @@ void eVTOL_Sim::tick() {
 
   // Enter state machine
   switch (curr_state) {
-    IN_FLIGHT:
+    case IN_FLIGHT:
       // Get hour per tick
       // Increment miles flown by tick time
       stats.vehicle_fly_distance_mi += params.cruise_speed_mph * hr_per_tick;
@@ -113,7 +113,7 @@ void eVTOL_Sim::tick() {
 
       break;
 
-    CHARGING:
+    case CHARGING:
       // Increment total charging time
       stats.total_charge_time_hr += hr_per_tick;
 
@@ -135,7 +135,7 @@ void eVTOL_Sim::tick() {
 
       break;
 
-    WAITING_TO_CHARGE:
+    case WAITING_TO_CHARGE:
       // Should not reach this point, throw error
       // Instead, should be unblocked by calling "start_charge" from within Charger instance
       throw std::runtime_error("Should not process tick while WAITING!");

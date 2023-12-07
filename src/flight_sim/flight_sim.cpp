@@ -41,11 +41,13 @@ void FlightSim::display_company_makeup()
 void FlightSim::sim_flight(float sim_time_hr)
 {
   cout << "Beginning Flight Sim, simulated duration: " << sim_time_hr << " hours" << endl;
-  this->end_timestamp = global_clk->get_timestamp() + sim_time_hr;
+  float start_timestamp = global_clk->get_timestamp();
+  end_timestamp = start_timestamp + sim_time_hr;
 
-  // Skip one line for progress bar
-  cout << endl;
-  do {
+  int pct_complete = 0;
+
+  do
+  {
     // Start by ticking clock
     global_clk->tick();
 
@@ -68,11 +70,12 @@ void FlightSim::sim_flight(float sim_time_hr)
     }
 
     // Calc percentage complete via timestamp
-    float time_complete_hr = this->end_timestamp - global_clk->get_timestamp();
-    int pct_complete = (int)(100.0 * (time_complete_hr / sim_time_hr));
-    cout << "\r" << pct_complete << "%% complete";
-    cout.flush();
-  } while(global_clk->get_timestamp() < this->end_timestamp);
+    float time_complete_hr = global_clk->get_timestamp() - start_timestamp;
+    pct_complete = (int)roundf(100.0 * (time_complete_hr / sim_time_hr));
+    cout << pct_complete << "%% complete @ " << global_clk->get_timestamp()
+         << ", end time " << end_timestamp << endl;
+  }
+  while(global_clk->get_timestamp() < end_timestamp);
 
   cout << "Completed " << sim_time_hr << " hour simulation!" << endl;
 }

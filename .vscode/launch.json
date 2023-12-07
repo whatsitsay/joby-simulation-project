@@ -22,8 +22,8 @@
             },
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "gdb.exe",
-                "program": "${workspaceFolder}/output/main.exe"
+                "miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
+                "program": "${workspaceFolder}/build/main.exe"
             },
             "preLaunchTask": "build"
         }

@@ -1,10 +1,15 @@
+#include <iostream>
 #include "global_clk.h"
 
 GlobalClk::GlobalClk(float start_time, float hr_per_tick)
 {
   // Set local variables and counters
-  curr_timestamp = start_time;
-  hr_per_tick    = hr_per_tick;
+  this->curr_timestamp = start_time;
+  this->hr_per_tick    = hr_per_tick;
+
+  if (hr_per_tick <= 0) {
+    throw std::runtime_error("Invalid hours-per-tick!");
+  }
 }
 
 void GlobalClk::tick()
