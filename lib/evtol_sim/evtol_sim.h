@@ -23,6 +23,7 @@ class eVTOL_Sim {
     VTOL_State_e curr_state;
     float flight_end_timestamp; // Flight is complete
     float charge_end_timestamp; // Charging is complete
+    bool blocked; // VTOL currently blocked (waiting on charger)
 
     // Clock pointer
     std::shared_ptr<GlobalClk> clk;
@@ -63,11 +64,33 @@ class eVTOL_Sim {
     bool is_blocked();
 
     /**
+     * @brief Set internal blocked flag
+     * 
+     * Separated from FSM to have check occur after FSM processing, decoupling
+     * it from Charger queuing
+     */
+    void check_blocked();
+
+    /**
      * @brief: Process tick
      * 
      * Uses the global clock's current timestamp to progress the state machine if needed
      */
     void tick();
+
+    /**
+     * @brief Get the eVTOL company for this instance
+     * 
+     * @return VTOL_Comp_e - eVTOL company enum
+     */
+    VTOL_Comp_e get_company();
+
+    /**
+     * @brief Get pointer to this eVTOL's running statistics block
+     * 
+     * @return VTOLStats_t* - Pointer to eVTOL sim statistics
+     */
+    VTOLStats_t* get_stats_ptr();
 };
 
 #endif // __VTOL_SIM__

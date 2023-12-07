@@ -109,4 +109,13 @@ std::map<VTOL_Comp_e, std::string> comp_names{
   {ECHO,    "Echo"},
 };
 
+// Map of num passengers per vehicle type
+std::map<VTOL_Comp_e, int> vtol_passengers{
+  {ALPHA,   ALPHA_NUM_PASSENGERS},  
+  {BRAVO,   BRAVO_NUM_PASSENGERS},
+  {CHARLIE, CHARLIE_NUM_PASSENGERS}, 
+  {DELTA,   DELTA_NUM_PASSENGERS}, 
+  {ECHO,    ECHO_NUM_PASSENGERS}, 
+};
+
 #endif // __EVTOL_TYPES__

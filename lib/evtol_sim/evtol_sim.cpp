@@ -21,6 +21,9 @@ eVTOL_Sim::eVTOL_Sim(VTOL_Comp_e company, std::shared_ptr<GlobalClk> clk) {
   // TODO: is this a correct assumption? Could also be a Poisson distribution
   fault_dist = std::bernoulli_distribution(this->params.fault_prob_per_hr * this->clk->get_hr_per_tick());
 
+  // Clear blocked flag. Will be set on tick call
+  this->blocked = false;
+
   // Start a flight
   start_flight(this->clk->get_timestamp());
 }
@@ -34,6 +37,11 @@ void eVTOL_Sim::start_flight(float timestamp) {
   // Set flight time end as timestamp + flight time hr
   flight_end_timestamp = timestamp + flight_time_hr;
 
+  // Update stats based on start time and current timestamp
+  float timestamp_diff = clk->get_timestamp() - timestamp;
+  stats.vehicle_fly_time_hr += timestamp_diff;
+  stats.vehicle_fly_distance_mi += timestamp_diff * params.cruise_speed_mph;
+
   // Change state
   curr_state = IN_FLIGHT;
 }
@@ -41,6 +49,11 @@ void eVTOL_Sim::start_flight(float timestamp) {
 void eVTOL_Sim::start_charge(float timestamp) {
   // Set charge end time to timestamp + charge time
   charge_end_timestamp = timestamp + params.chg_time_hr;
+
+  // Update stats based on start time and current timestamp
+  float timestamp_diff = clk->get_timestamp() - timestamp;
+  stats.total_charge_time_hr += timestamp_diff;
+
   // Set state to CHARGING
   curr_state = CHARGING;
 }
@@ -52,7 +65,12 @@ void eVTOL_Sim::_check_fault() {
 
 bool eVTOL_Sim::is_blocked() {
   // Return whether VTOL is waiting or not
-  return (curr_state == WAITING_TO_CHARGE);
+  return blocked;
+}
+
+void eVTOL_Sim::check_blocked() {
+  // Mark as blocked if after FSM processing VTOL is in "waiting" state
+  blocked = (curr_state == WAITING_TO_CHARGE);
 }
 
 void eVTOL_Sim::tick() {
@@ -87,7 +105,7 @@ void eVTOL_Sim::tick() {
         // Successfully got key! Start charging using flight end timestamp as start
         start_charge(flight_end_timestamp);
       } else {
-        // Chargers are accounted for, change to "waiting"
+        // Chargers are accounted for, change to "waiting" and set blocked flag
         curr_state = WAITING_TO_CHARGE;
       }
 
@@ -121,4 +139,14 @@ void eVTOL_Sim::tick() {
       throw std::runtime_error("Should not process tick while WAITING!");
     }
   }
+}
+
+VTOL_Comp_e eVTOL_Sim::get_company()
+{
+  return this->company;
+}
+
+VTOLStats_t* eVTOL_Sim::get_stats_ptr()
+{
+  return &(this->stats);
 }
