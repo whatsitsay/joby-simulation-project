@@ -6,15 +6,16 @@
 
 #include "evtol_sim.h"
 
-eVTOL_Sim::eVTOL_Sim(VTOL_Comp_e company, std::shared_ptr<GlobalClk> clk) {
+eVTOL_Sim::eVTOL_Sim(VTOL_Comp_e company, std::shared_ptr<GlobalClk> clk, std::shared_ptr<Charger> charger) {
   // Copy in parameters using company enum
   this->company = company;
-  memcpy(&this->params, &(comp_map[company]), sizeof(VTOLParams_t));
-  // Assign local clock pointer
+  memcpy(&this->params, &(COMP_MAP.at(company)), sizeof(VTOLParams_t));
+  // Assign local clock and charger pointers
   this->clk = clk;
+  this->charger = charger;
 
   // Initialize statistics to all zeros
-  stats = {0, 0, 0};
+  stats = {0, 0, 0, 0};
 
   // Initialize fault bernoulli distribution to fault per hour x hour per tick
   // Assumes uniform probability distribution per hour and hr_per_tick <= 1
@@ -77,10 +78,11 @@ void eVTOL_Sim::tick() {
   // Start by getting the current timestamp and hr_per_tick
   float curr_timestamp = clk->get_timestamp();
   float hr_per_tick    = clk->get_hr_per_tick();
+  float timestamp_diff; // For timestamp correction later on
 
   // Enter state machine
   switch (curr_state) {
-    IN_FLIGHT: {
+    IN_FLIGHT:
       // Get hour per tick
       // Increment miles flown by tick time
       stats.vehicle_fly_distance_mi += params.cruise_speed_mph * hr_per_tick;
@@ -97,11 +99,11 @@ void eVTOL_Sim::tick() {
       // Subtract difference between current timestamp and flight end
       // NOTE: this could just be done at the end with the total time, but allows
       // for mid-sim checking of distance flown (if desired)
-      float timestamp_diff           = curr_timestamp - flight_end_timestamp;
+      timestamp_diff                 = curr_timestamp - flight_end_timestamp;
       stats.vehicle_fly_distance_mi -= timestamp_diff * hr_per_tick;
 
       // Try to get charger key, passing pointer to this instance
-      if (Charger::try_get_charger(this)) {
+      if (charger->try_get_charger(this)) {
         // Successfully got key! Start charging using flight end timestamp as start
         start_charge(flight_end_timestamp);
       } else {
@@ -110,8 +112,8 @@ void eVTOL_Sim::tick() {
       }
 
       break;
-    }
-    CHARGING: {
+
+    CHARGING:
       // Increment total charging time
       stats.total_charge_time_hr += hr_per_tick;
 
@@ -122,22 +124,25 @@ void eVTOL_Sim::tick() {
       // Subtract difference between current timestamp and charge end
       // NOTE: this could just be done at the end with the total time, but allows
       // for mid-sim checking of charge time (if desired)
-      float timestamp_diff = curr_timestamp - charge_end_timestamp;
+      timestamp_diff              = curr_timestamp - charge_end_timestamp;
       stats.total_charge_time_hr -= timestamp_diff;
 
       // Go directly into flight, using charge end as timestamp
       start_flight(charge_end_timestamp);
 
       // Release charger, passing the charge end timestamp
-      Charger::release_charger(charge_end_timestamp);
+      charger->release_charger(charge_end_timestamp);
 
       break;
-    }
-    WAITING_TO_CHARGE: {
+
+    WAITING_TO_CHARGE:
       // Should not reach this point, throw error
       // Instead, should be unblocked by calling "start_charge" from within Charger instance
       throw std::runtime_error("Should not process tick while WAITING!");
-    }
+      break;
+
+    default:
+      throw std::runtime_error("Reached undefined state!");
   }
 }
 

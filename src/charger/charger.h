@@ -5,16 +5,19 @@
  * 
  */
 
-#ifndef __CHARGER__
-#define __CHARGER__
+#ifndef _CHARGER_H_
+#define _CHARGER_H_
 
 #include <deque>
 #include <evtol_sim.h>
 
+// Included here due to circular dependency
+typedef class eVTOL_Sim;
+
 class Charger {
   private:
-    static int chargers_available; // Counter for number of chargers available
-    static std::deque<eVTOL_Sim *> wait_q; // Wait queue for VTOLs
+    int chargers_available; // Counter for number of chargers available
+    std::deque<eVTOL_Sim *> wait_q; // Wait queue for VTOLs
 
   public:
     /**
@@ -31,7 +34,7 @@ class Charger {
      * @return true - If charger is available
      * @return false - If charger is not available. Also added to internal wait queue
      */
-    static bool try_get_charger(eVTOL_Sim* vtol_ptr);
+    bool try_get_charger(eVTOL_Sim* vtol_ptr);
 
     /**
      * @brief Release a charger
@@ -40,7 +43,7 @@ class Charger {
      * 
      * @param timestamp - Timestamp of charger release, passed from releasing VTOL
      */
-    static void release_charger(float timestamp);
-}
+    void release_charger(float timestamp);
+};
 
-#endif // __CHARGER__
+#endif // _CHARGER_

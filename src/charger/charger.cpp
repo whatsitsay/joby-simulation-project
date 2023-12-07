@@ -8,7 +8,7 @@ Charger::Charger(int num_chargers)
   chargers_available = num_chargers;
 }
 
-static bool Charger::try_get_charger(eVTOL_Sim* vtol_ptr)
+bool Charger::try_get_charger(eVTOL_Sim* vtol_ptr)
 {
   // Act based on number of chargers available
   if (chargers_available > 0)
@@ -23,7 +23,7 @@ static bool Charger::try_get_charger(eVTOL_Sim* vtol_ptr)
   return false;
 }
 
-static void Charger::release_charger(float timestamp)
+void Charger::release_charger(float timestamp)
 {
   if (wait_q.empty())
   {
@@ -32,8 +32,10 @@ static void Charger::release_charger(float timestamp)
   }
   else
   {
-    // Pop a waiting VTOL from the wait queue
-    eVTOL_Sim* vtol = wait_q.pop_front();
+    // Get the most recent waiting VTOL from the wait queue
+    eVTOL_Sim* vtol = wait_q.front();
+    // Pop from the queue
+    wait_q.pop_front();
     // Unblock VTOL by calling it's "start_charge" method
     vtol->start_charge(timestamp);
   }

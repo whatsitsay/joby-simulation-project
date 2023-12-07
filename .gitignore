@@ -1,0 +1,4 @@
+# Ignore all build files
+**/*.d
+**/*.o
+build/*

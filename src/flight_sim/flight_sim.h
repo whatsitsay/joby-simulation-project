@@ -2,16 +2,16 @@
  * Flight simulator and statistics aggregator
  */
 
-#ifndef __FLIGHT_SIM__
-#define __FLIGHT_SIM__
+#ifndef _FLIGHT_SIM_
+#define _FLIGHT_SIM_
 
 #include <iostream>
 #include <deque>
+#include <memory>
 #include <types.h>
 #include <evtol_sim.h>
 #include <global_clk.h>
 #include <charger.h>
-
 
 using namespace std;
 
@@ -27,7 +27,7 @@ class FlightSim {
     deque<eVTOL_Sim *> evtol_companies[MAX_COMPANIES];
 
     // Charger instance
-    Charger charger;
+    shared_ptr<Charger> charger;
 
     // Global clock instance
     shared_ptr<GlobalClk> global_clk;
@@ -82,3 +82,5 @@ class FlightSim {
      */
     void force_time(float timestamp);
 };
+
+#endif // _FLIGHT_SIM_

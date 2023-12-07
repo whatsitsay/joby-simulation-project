@@ -1,5 +1,5 @@
-#ifndef __GLOBAL_CLK__
-#define __GLOBAL_CLK__
+#ifndef _GLOBAL_CLK_
+#define _GLOBAL_CLK_
 
 // Simple class for synchronizing all sim instances
 class GlobalClk {
@@ -38,6 +38,6 @@ class GlobalClk {
      * @param timestamp - Desired timestamp value
      */
     void set_timestamp(float timestamp);
-}
+};
 
-#endif // __GLOBAL_CLK__
+#endif // _GLOBAL_CLK_

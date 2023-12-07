@@ -1,9 +1,14 @@
-#ifndef __VTOL_SIM__
-#define __VTOL_SIM__
+#ifndef _VTOL_SIM_
+#define _VTOL_SIM_
 
+#include <memory>
+#include <random>
 #include <types.h>
 #include <global_clk.h>
-#include <random>
+#include <charger.h>
+
+// Included here due to circular dependency
+typedef class Charger;
 
 // Class prototype
 class eVTOL_Sim {
@@ -28,6 +33,9 @@ class eVTOL_Sim {
     // Clock pointer
     std::shared_ptr<GlobalClk> clk;
 
+    // Charger pointer
+    std::shared_ptr<Charger> charger;
+
     // Internal methods
 
     /**
@@ -37,7 +45,7 @@ class eVTOL_Sim {
   
   public:
     // Constructor
-    eVTOL_Sim(VTOL_Comp_e company, std::shared_ptr<GlobalClk> clk);
+    eVTOL_Sim(VTOL_Comp_e company, std::shared_ptr<GlobalClk> clk, std::shared_ptr<Charger> charger);
 
     /**
      * @brief Start flight
@@ -93,4 +101,4 @@ class eVTOL_Sim {
     VTOLStats_t* get_stats_ptr();
 };
 
-#endif // __VTOL_SIM__
+#endif // _VTOL_SIM_

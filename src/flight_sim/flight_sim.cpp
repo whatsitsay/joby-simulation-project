@@ -1,10 +1,10 @@
-#include "flight_sim.h"
 #include <iostream>
 #include <deque>
 #include <types.h>
 #include <evtol_sim.h>
 #include <global_clk.h>
 #include <charger.h>
+#include "flight_sim.h"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ FlightSim::FlightSim(int num_vtols, int num_chargers, float tick_rate)
   // Instantiate clock
   global_clk = make_shared<GlobalClk>(0, tick_rate);
   // Instantiate charger
-  charger = Charger::Charger(num_chargers);
+  charger = make_shared<Charger>(num_chargers);
 
   // Iterate over and instantiate eVTOL sims
   for (int i = 0; i < num_vtols; i++) {
@@ -21,7 +21,7 @@ FlightSim::FlightSim(int num_vtols, int num_chargers, float tick_rate)
     VTOL_Comp_e company = (VTOL_Comp_e)(rand() % MAX_COMPANIES);
 
     // Instantiate sim instance and push into main queue
-    evtol_q.emplace_back(company, global_clk);
+    evtol_q.emplace_back(company, global_clk, charger);
 
     // Push into relevant queue for stats aggregation
     evtol_companies[company].push_back(&evtol_q.back());
@@ -85,7 +85,7 @@ void FlightSim::aggregate_company_stats() {
     // If queue for company is empty, indicate as such and skip
     if (evtol_companies[company].empty())
     {
-      cout << "No eVTOLs instantiated for " << comp_names[comp_enum] << " company.\n" << endl;
+      cout << "No eVTOLs instantiated for " << COMP_NAMES.at(comp_enum) << " company.\n" << endl;
       continue;
     }
 
@@ -110,10 +110,10 @@ void FlightSim::aggregate_company_stats() {
       avg_charging_time += stats_p->total_charge_time_hr / num_vtols;
       // Totals
       total_faults += stats_p->num_faults;
-      total_passenger_miles += stats_p->vehicle_fly_distance_mi * vtol_passengers[comp_enum];
+      total_passenger_miles += stats_p->vehicle_fly_distance_mi * VTOL_PASSENGERS.at(comp_enum);
     }
 
-    cout << comp_names[comp_enum] << " Statistics:" << endl;
+    cout << COMP_NAMES.at(comp_enum) << " Statistics:" << endl;
     cout << "\tAvg. Flight Time:      " << avg_flight_time << " hours" << endl;
     cout << "\tAvg. Flight Distance:  " << avg_flight_distance << " miles" << endl;
     cout << "\tAvg. Charging Time:    " << avg_charging_time << " hours" << endl;

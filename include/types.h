@@ -2,6 +2,7 @@
 #define __EVTOL_TYPES__
 
 #include <map>
+#include <string>
 
 // eVTOL aircraft companies
 typedef enum _VTOL_Comp {
@@ -92,7 +93,7 @@ const VTOLParams_t ECHO_PARAMS = {
 // Map of company enum->params
 // Using std::move as params should only be called from map
 // NOTE: could be array, but this is a bit more dynamic
-std::map<VTOL_Comp_e, VTOLParams_t> comp_map{
+const std::map<VTOL_Comp_e, VTOLParams_t> COMP_MAP{
   {ALPHA,   std::move(ALPHA_PARAMS)},
   {BRAVO,   std::move(BRAVO_PARAMS)},
   {CHARLIE, std::move(CHARLIE_PARAMS)},
@@ -101,7 +102,7 @@ std::map<VTOL_Comp_e, VTOLParams_t> comp_map{
 };
 
 // Map of enums to company name strings
-std::map<VTOL_Comp_e, std::string> comp_names{
+const std::map<VTOL_Comp_e, std::string> COMP_NAMES{
   {ALPHA,   "Alpha"},
   {BRAVO,   "Bravo"},
   {CHARLIE, "Charlie"},
@@ -110,7 +111,7 @@ std::map<VTOL_Comp_e, std::string> comp_names{
 };
 
 // Map of num passengers per vehicle type
-std::map<VTOL_Comp_e, int> vtol_passengers{
+const std::map<VTOL_Comp_e, int> VTOL_PASSENGERS{
   {ALPHA,   ALPHA_NUM_PASSENGERS},  
   {BRAVO,   BRAVO_NUM_PASSENGERS},
   {CHARLIE, CHARLIE_NUM_PASSENGERS}, 
