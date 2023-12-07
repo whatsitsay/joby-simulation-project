@@ -81,4 +81,4 @@ class FlightSim {
      * @param timestamp - Desired new timestamp
      */
     void force_time(float timestamp);
-}
+};
