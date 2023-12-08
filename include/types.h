@@ -28,6 +28,7 @@ typedef struct  VTOLStats_t{
   int num_faults;                 // Total faults accrued while in flight
   float vehicle_fly_time_hr;      // Total hours flown
   float vehicle_fly_distance_mi;  // Total number of miles flown for the vehicle
+  float charge_wait_time_hr;      // Total time spent waiting to charge
 };
 
 // Structure for VTOL sim parameters

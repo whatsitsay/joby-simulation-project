@@ -109,6 +109,7 @@ void FlightSim::aggregate_company_stats() {
     float avg_flight_time       = 0;
     float avg_flight_distance   = 0;
     float avg_charging_time     = 0;
+    float avg_waiting_time      = 0;
     int total_faults            = 0;
     float total_passenger_miles = 0;
 
@@ -123,6 +124,7 @@ void FlightSim::aggregate_company_stats() {
       avg_flight_time += stats_p->vehicle_fly_time_hr / num_vtols;
       avg_flight_distance += stats_p->vehicle_fly_distance_mi / num_vtols;
       avg_charging_time += stats_p->total_charge_time_hr / num_vtols;
+      avg_waiting_time += stats_p->charge_wait_time_hr / num_vtols;
       // Totals
       total_faults += stats_p->num_faults;
       total_passenger_miles += stats_p->vehicle_fly_distance_mi * VTOL_PASSENGERS.at(comp_enum);
@@ -133,8 +135,9 @@ void FlightSim::aggregate_company_stats() {
     cout << "\tAvg. Flight Distance:  " << avg_flight_distance << " miles" << endl;
     cout << "\tAvg. Charging Time:    " << avg_charging_time << " hours" << endl;
     cout << "\tTotal Faults:          " << total_faults << endl;
-    cout << "\tTotal Passenger Miles: " << total_passenger_miles;
-    cout << endl << endl; // Extra line break between company stats blocks
+    cout << "\tTotal Passenger Miles: " << total_passenger_miles << endl;
+    cout << "\tAvg. Waiting Time:     " << avg_waiting_time << " hours" << endl;
+    cout << endl; // Extra line break between company stats blocks
   }
 }
 

@@ -75,8 +75,8 @@ MAINOBJ   := $(SRCMAIN:.cpp=.o)
 
 # Switch between main and test here
 # TODO: make more elegant, perhaps with a runtime switch
-# OBJECTS += $(MAINOBJ)
-OBJECTS += $(TESTOBJ)
+OBJECTS += $(MAINOBJ)
+# OBJECTS += $(TESTOBJ)
 
 # define the dependency output files
 DEPS		:= $(OBJECTS:.o=.d)

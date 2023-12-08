@@ -15,7 +15,7 @@ eVTOL_Sim::eVTOL_Sim(VTOL_Comp_e company, std::shared_ptr<GlobalClk> clk, std::s
   this->charger = charger;
 
   // Initialize statistics to all zeros
-  this->stats = {0, 0, 0, 0};
+  this->stats = {0, 0, 0, 0, 0};
 
   // Initialize fault bernoulli distribution to fault per hour x hour per tick
   // Assumes uniform probability distribution per hour and hr_per_tick <= 1
@@ -55,6 +55,11 @@ void eVTOL_Sim::start_charge(float timestamp) {
   float timestamp_diff = clk->get_timestamp() - timestamp;
   stats.total_charge_time_hr += timestamp_diff;
 
+  // If previously blocked, correct charge wait time by difference
+  if (curr_state == WAITING_TO_CHARGE) {
+    stats.charge_wait_time_hr -= timestamp_diff;
+  }
+
   // Set state to CHARGING
   curr_state = CHARGING;
 }
@@ -65,6 +70,9 @@ void eVTOL_Sim::_check_fault() {
 }
 
 bool eVTOL_Sim::is_blocked() {
+  // Increment "waiting to charge" time here by tick
+  // Will be corrected when unblocked
+  if (blocked) stats.charge_wait_time_hr += clk->get_hr_per_tick();
   // Return whether VTOL is waiting or not
   return blocked;
 }
@@ -110,6 +118,8 @@ void eVTOL_Sim::tick() {
       } else {
         // Chargers are accounted for, change to "waiting" and set blocked flag
         curr_state = WAITING_TO_CHARGE;
+        // Updated waiting_to_charge time
+        stats.charge_wait_time_hr += timestamp_diff;
       }
 
       break;
