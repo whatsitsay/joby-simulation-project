@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <deque>
+#include <deque>
 #include <memory>
 #include <types.h>
 #include <evtol_sim.h>
@@ -21,10 +22,10 @@ class FlightSim {
     float end_timestamp;
 
     // Main array of VTOLs
-    vector<eVTOL_Sim> evtol_arr;
+    vector<shared_ptr<eVTOL_Sim>> evtol_arr;
 
-    // Array of queues for stats aggregation 
-    deque<eVTOL_Sim *> evtol_companies[MAX_COMPANIES];
+    // Array of vectors for stats aggregation 
+    vector<shared_ptr<eVTOL_Sim>> evtol_companies[MAX_COMPANIES];
 
     // Charger instance
     shared_ptr<Charger> charger;
@@ -39,8 +40,9 @@ class FlightSim {
      * @param num_vtols - Number of eVTOLs to simulate
      * @param num_chargers - Number of chargers to simulate
      * @param tick_rate - Hours passed per tick
+     * @param comp - Company designation (default random)
      */
-    FlightSim(int num_vtols, int num_chargers, float tick_rate);
+    FlightSim(int num_vtols, int num_chargers, float tick_rate, VTOL_Comp_e comp = MAX_COMPANIES);
 
     /**
      * @brief Print the company makeup for all eVTOLs

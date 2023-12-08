@@ -31,6 +31,9 @@ void test_setup(int num_vtols)
 void test_single_vehicle()
 {
   int num_vtols = 1;
+
+  cout << "Testing single eVTOL" << endl;
+
   test_setup(num_vtols);
 
   sim_inst->display_company_makeup();
@@ -40,9 +43,25 @@ void test_single_vehicle()
   sim_inst->aggregate_company_stats();
 }
 
+void test_two_vehicles()
+{
+  cout << "Testing two eVTOLs" << endl;
+
+  int num_vtols = 2;
+  test_setup(num_vtols);
+
+  sim_inst->display_company_makeup();
+
+  sim_inst->sim_flight(3.0);
+
+  sim_inst->aggregate_company_stats();
+
+}
+
 
 int main(int argc, char *argv[])
 {
-  test_single_vehicle();
+  // test_single_vehicle();
+  test_two_vehicles();
   return 0;
 }

@@ -34,9 +34,9 @@ void Charger::release_charger(float timestamp)
   {
     // Get the most recent waiting VTOL from the wait queue
     eVTOL_Sim* vtol = wait_q.front();
-    // Pop from the queue
-    wait_q.pop_front();
     // Unblock VTOL by calling it's "start_charge" method
     vtol->start_charge(timestamp);
+    // Pop from the queue
+    wait_q.pop_front();
   }
 }

@@ -1,5 +1,5 @@
 #include <iostream>
-#include <deque>
+#include <vector>
 #include <types.h>
 #include <evtol_sim.h>
 #include <global_clk.h>
@@ -8,7 +8,7 @@
 
 using namespace std;
 
-FlightSim::FlightSim(int num_vtols, int num_chargers, float tick_rate)
+FlightSim::FlightSim(int num_vtols, int num_chargers, float tick_rate, VTOL_Comp_e comp)
 {
   // Instantiate clock
   global_clk = make_shared<GlobalClk>(0, tick_rate);
@@ -17,14 +17,18 @@ FlightSim::FlightSim(int num_vtols, int num_chargers, float tick_rate)
 
   // Iterate over and instantiate eVTOL sims
   for (int i = 0; i < num_vtols; i++) {
-    // Randomize company. Just use rand() as this is a very simple randomization
-    VTOL_Comp_e company = (VTOL_Comp_e)(rand() % MAX_COMPANIES);
+    // Set to company parameter, unless input is "MAX_COMPANIES"
+    // If max, randomize per instance. Just use rand() as this is a very simple randomization
+    VTOL_Comp_e company = (comp == MAX_COMPANIES) ? (VTOL_Comp_e)(rand() % MAX_COMPANIES) : comp;
 
-    // Instantiate sim instance and push into main queue
-    evtol_arr.emplace_back(company, global_clk, charger);
+    // Instantiate instance
+    shared_ptr<eVTOL_Sim> evtol_p = make_shared<eVTOL_Sim>(company, global_clk, charger);
+
+    // Push into main queue
+    evtol_arr.push_back(evtol_p);
 
     // Push into relevant queue for stats aggregation
-    evtol_companies[company].push_back(&evtol_arr.back());
+    evtol_companies[company].push_back(evtol_p);
   }
 }
 
@@ -46,16 +50,17 @@ void FlightSim::sim_flight(float sim_time_hr)
 
   int pct_complete = 0;
 
-  while(global_clk->get_timestamp() < end_timestamp)
+  while(pct_complete < 100)
   {
     // Start by ticking clock
     global_clk->tick();
 
     // Next iterate through all VTOLs
-    vector<eVTOL_Sim>::iterator vtol;
-    for (vtol = evtol_arr.begin(); vtol != evtol_arr.end(); ++vtol) {
+    for (shared_ptr<eVTOL_Sim> vtol : evtol_arr) {
         // If particular VTOL is blocked, skip
-        if (vtol->is_blocked()) continue;
+        if (vtol->is_blocked()) {
+          continue;
+        }
 
         // Activate tick
         vtol->tick();
@@ -66,14 +71,14 @@ void FlightSim::sim_flight(float sim_time_hr)
     // Iterate again, checking 
     // This is done separately to avoid ticking instances twice
     // but still update based on charger availability
-    for (vtol = evtol_arr.begin(); vtol != evtol_arr.end(); ++vtol) {
+    for (shared_ptr<eVTOL_Sim> vtol : evtol_arr) {
       vtol->check_blocked();
     }
 
     // Calc percentage complete via timestamp
     float time_complete_hr = global_clk->get_timestamp() - start_timestamp;
     pct_complete = (int)roundf(100.0 * (time_complete_hr / sim_time_hr));
-    cout << pct_complete << "%% complete @ " << global_clk->get_timestamp()
+    cout << pct_complete << "% complete @ " << global_clk->get_timestamp()
          << ", end time " << end_timestamp << endl;
   }
 
@@ -82,7 +87,7 @@ void FlightSim::sim_flight(float sim_time_hr)
 
 void FlightSim::aggregate_company_stats() {
   cout << "Company Statistics:\n" << endl;
-  for (int company = ALPHA; company != MAX_COMPANIES; company++)
+  for (int company = 0; company < MAX_COMPANIES; company++)
   {
     VTOL_Comp_e comp_enum = static_cast<VTOL_Comp_e>(company);
     // If queue for company is empty, indicate as such and skip
@@ -104,7 +109,7 @@ void FlightSim::aggregate_company_stats() {
     float num_vtols = evtol_companies[company].size();
 
     // Iterate over all eVTOLs of company make
-    for (eVTOL_Sim* vtol_p : evtol_companies[company])
+    for (shared_ptr<eVTOL_Sim> vtol_p : evtol_companies[company])
     {
       VTOLStats_t* stats_p = vtol_p->get_stats_ptr();
       // Averages
@@ -122,7 +127,7 @@ void FlightSim::aggregate_company_stats() {
     cout << "\tAvg. Charging Time:    " << avg_charging_time << " hours" << endl;
     cout << "\tTotal Faults:          " << total_faults << endl;
     cout << "\tTotal Passenger Miles: " << total_passenger_miles;
-    cout << endl; // Extra line break between company stats blocks
+    cout << endl << endl; // Extra line break between company stats blocks
   }
 }
 

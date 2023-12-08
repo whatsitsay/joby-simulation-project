@@ -100,6 +100,7 @@ void eVTOL_Sim::tick() {
       // NOTE: this could just be done at the end with the total time, but allows
       // for mid-sim checking of distance flown (if desired)
       timestamp_diff                 = curr_timestamp - flight_end_timestamp;
+      stats.vehicle_fly_time_hr     -= timestamp_diff;
       stats.vehicle_fly_distance_mi -= timestamp_diff * hr_per_tick;
 
       // Try to get charger key, passing pointer to this instance
