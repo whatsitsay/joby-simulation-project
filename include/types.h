@@ -23,21 +23,21 @@ typedef enum _VTOL_State {
 } VTOL_State_e;
 
 // Structure for VTOL sim statistics
-typedef struct _VTOLStats {
+typedef struct  VTOLStats_t{
   float total_charge_time_hr;     // Total time spent charging (TODO: doc says to track time "per session", but does that mean altogether, or include the waiting time?)
   int num_faults;                 // Total faults accrued while in flight
   float vehicle_fly_time_hr;      // Total hours flown
   float vehicle_fly_distance_mi;  // Total number of miles flown for the vehicle
-} VTOLStats_t;
+};
 
 // Structure for VTOL sim parameters
-typedef struct _VTOLParams {
+typedef struct VTOLParams_t{
   int cruise_speed_mph;
   int battery_capacity_kwh;
   float chg_time_hr;
   float energy_use_kwh_per_mi;
   float fault_prob_per_hr;
-} VTOLParams_t;
+};
 
 // Company-specific parameters
 // Alpha

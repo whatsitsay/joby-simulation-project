@@ -15,7 +15,7 @@ eVTOL_Sim::eVTOL_Sim(VTOL_Comp_e company, std::shared_ptr<GlobalClk> clk, std::s
   this->charger = charger;
 
   // Initialize statistics to all zeros
-  stats = {0, 0, 0, 0};
+  this->stats = {0, 0, 0, 0};
 
   // Initialize fault bernoulli distribution to fault per hour x hour per tick
   // Assumes uniform probability distribution per hour and hr_per_tick <= 1
@@ -83,8 +83,8 @@ void eVTOL_Sim::tick() {
   // Enter state machine
   switch (curr_state) {
     case IN_FLIGHT:
-      // Get hour per tick
-      // Increment miles flown by tick time
+      // Increment time and miles flown by tick time
+      stats.vehicle_fly_time_hr += hr_per_tick;
       stats.vehicle_fly_distance_mi += params.cruise_speed_mph * hr_per_tick;
 
       // Check for fault

@@ -21,16 +21,16 @@ FlightSim::FlightSim(int num_vtols, int num_chargers, float tick_rate)
     VTOL_Comp_e company = (VTOL_Comp_e)(rand() % MAX_COMPANIES);
 
     // Instantiate sim instance and push into main queue
-    evtol_q.emplace_back(company, global_clk, charger);
+    evtol_arr.emplace_back(company, global_clk, charger);
 
     // Push into relevant queue for stats aggregation
-    evtol_companies[company].push_back(&evtol_q.back());
+    evtol_companies[company].push_back(&evtol_arr.back());
   }
 }
 
 void FlightSim::display_company_makeup()
 {
-  cout << "For " << evtol_q.size() << " eVTOLs instantiated, the breakdown is as follows:" << endl;
+  cout << "For " << evtol_arr.size() << " eVTOLs instantiated, the breakdown is as follows:" << endl;
   cout << "\tAlpha:   " << evtol_companies[ALPHA].size() << endl;
   cout << "\tBravo:   " << evtol_companies[BRAVO].size() << endl;
   cout << "\tCharlie: " << evtol_companies[CHARLIE].size() << endl;
@@ -46,18 +46,19 @@ void FlightSim::sim_flight(float sim_time_hr)
 
   int pct_complete = 0;
 
-  do
+  while(global_clk->get_timestamp() < end_timestamp)
   {
     // Start by ticking clock
     global_clk->tick();
 
     // Next iterate through all VTOLs
-    for (eVTOL_Sim vtol : evtol_q) {
+    vector<eVTOL_Sim>::iterator vtol;
+    for (vtol = evtol_arr.begin(); vtol != evtol_arr.end(); ++vtol) {
         // If particular VTOL is blocked, skip
-        if (vtol.is_blocked()) continue;
+        if (vtol->is_blocked()) continue;
 
         // Activate tick
-        vtol.tick();
+        vtol->tick();
     }
 
     // TODO: add means to track per-tick stats here
@@ -65,8 +66,8 @@ void FlightSim::sim_flight(float sim_time_hr)
     // Iterate again, checking 
     // This is done separately to avoid ticking instances twice
     // but still update based on charger availability
-    for (eVTOL_Sim vtol : evtol_q) {
-      vtol.check_blocked();
+    for (vtol = evtol_arr.begin(); vtol != evtol_arr.end(); ++vtol) {
+      vtol->check_blocked();
     }
 
     // Calc percentage complete via timestamp
@@ -75,7 +76,6 @@ void FlightSim::sim_flight(float sim_time_hr)
     cout << pct_complete << "%% complete @ " << global_clk->get_timestamp()
          << ", end time " << end_timestamp << endl;
   }
-  while(global_clk->get_timestamp() < end_timestamp);
 
   cout << "Completed " << sim_time_hr << " hour simulation!" << endl;
 }

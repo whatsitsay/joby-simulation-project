@@ -20,8 +20,8 @@ class FlightSim {
   private:
     float end_timestamp;
 
-    // Main queue of VTOLs
-    deque<eVTOL_Sim> evtol_q;
+    // Main array of VTOLs
+    vector<eVTOL_Sim> evtol_arr;
 
     // Array of queues for stats aggregation 
     deque<eVTOL_Sim *> evtol_companies[MAX_COMPANIES];
