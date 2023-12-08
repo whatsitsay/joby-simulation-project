@@ -3,6 +3,11 @@
  * @author Gabe Kaufman (gkaufman93@gmail.com)
  * @brief Test state transitions
  * 
+ * TODO: could be more like unit tests, where times/states are checked
+ * explicitly. However, this would require exposing more of the
+ * internal eVTOL instance stats. Currently they are not available
+ * at this scope (i.e. FlightSim).
+ * 
  * @copyright Copyright (c) 2023
  * 
  */
