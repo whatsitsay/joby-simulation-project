@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <random>
 #include <types.h>
 #include <evtol_sim.h>
 #include <global_clk.h>
@@ -15,11 +16,16 @@ FlightSim::FlightSim(int num_vtols, int num_chargers, float tick_rate, VTOL_Comp
   // Instantiate charger
   charger = make_shared<Charger>(num_chargers);
 
+  // Init randomizer
+  random_device rd;
+  mt19937 mt(rd());
+  uniform_int_distribution<int> dist(ALPHA, ECHO);
+
   // Iterate over and instantiate eVTOL sims
   for (int i = 0; i < num_vtols; i++) {
     // Set to company parameter, unless input is "MAX_COMPANIES"
     // If max, randomize per instance. Just use rand() as this is a very simple randomization
-    VTOL_Comp_e company = (comp == MAX_COMPANIES) ? (VTOL_Comp_e)(rand() % MAX_COMPANIES) : comp;
+    VTOL_Comp_e company = (comp == MAX_COMPANIES) ? (VTOL_Comp_e)(dist(rd)) : comp;
 
     // Instantiate instance
     shared_ptr<eVTOL_Sim> evtol_p = make_shared<eVTOL_Sim>(company, global_clk, charger);
@@ -78,11 +84,12 @@ void FlightSim::sim_flight(float sim_time_hr)
     // Calc percentage complete via timestamp
     float time_complete_hr = global_clk->get_timestamp() - start_timestamp;
     pct_complete = (int)roundf(100.0 * (time_complete_hr / sim_time_hr));
-    cout << pct_complete << "% complete @ " << global_clk->get_timestamp()
-         << ", end time " << end_timestamp << endl;
+    // NOTE: print is unnecessary, as simulation is very quick
+    // cout << pct_complete << "% complete @ " << global_clk->get_timestamp()
+    //      << ", end time " << end_timestamp << endl;
   }
 
-  cout << "Completed " << sim_time_hr << " hour simulation!" << endl;
+  cout << "\nCompleted " << sim_time_hr << " hour simulation!" << endl;
 }
 
 void FlightSim::aggregate_company_stats() {

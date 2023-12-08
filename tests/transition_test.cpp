@@ -17,7 +17,7 @@
 
 FlightSim* sim_inst;
 #define HR_PER_TICK (0.05)
-#define NUM_CHARGERS (1)
+#define NUM_CHARGERS (3)
 
 void test_setup(int num_vtols)
 {
@@ -58,10 +58,26 @@ void test_two_vehicles()
 
 }
 
+void test_five_vehicles()
+{
+  cout << "Testing five eVTOLs" << endl;
+
+  int num_vtols = 5;
+  test_setup(num_vtols);
+
+  sim_inst->display_company_makeup();
+
+  sim_inst->sim_flight(3.0);
+
+  sim_inst->aggregate_company_stats();
+
+}
+
 
 int main(int argc, char *argv[])
 {
   // test_single_vehicle();
-  test_two_vehicles();
+  // test_two_vehicles();
+  test_five_vehicles();
   return 0;
 }
